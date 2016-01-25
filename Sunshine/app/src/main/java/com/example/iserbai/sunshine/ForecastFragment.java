@@ -1,5 +1,6 @@
 package com.example.iserbai.sunshine;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,9 +12,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.text.format.Time;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,16 +46,26 @@ public class ForecastFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         String[] days={"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         List<String> weekForecast = new ArrayList<String>(Arrays.asList(days));
         week = new ArrayAdapter<String>(getActivity(), R.layout.forecast_text_view,
                 R.id.forecast_text_view, weekForecast);
-        ListView list = (ListView) rootView.findViewById(R.id.forecast_list_view);
+        final ListView list = (ListView) rootView.findViewById(R.id.forecast_list_view);
         list.setAdapter(week);
         setHasOptionsMenu(true);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String EXTRA_MESSAGE = "forecast_data";
+                CharSequence intentText = week.getItem(position);
+                Intent intent = new Intent(getContext(), DetailedActivity.class);
+                intent.putExtra(EXTRA_MESSAGE, intentText);
+                startActivity(intent);
 
+            }
+        });
 
         return rootView;
     }
