@@ -12,6 +12,17 @@
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/forecast_list_view" />
+        android:id="@+id/forecast_list_view" >
+    </ListView>
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="110sp"
+        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:gravity="center_vertical"
+        android:id="@+id/forecast_text_view"
+        android:textSize="25sp">
+
+    </TextView>
 
 </RelativeLayout>

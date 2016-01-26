@@ -16,7 +16,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.text.format.Time;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,13 +45,13 @@ public class ForecastFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         String[] days={"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         List<String> weekForecast = new ArrayList<String>(Arrays.asList(days));
-        week = new ArrayAdapter<String>(getActivity(), R.layout.forecast_text_view,
+        week = new ArrayAdapter<String>(getActivity(), R.layout.fragment_main,
                 R.id.forecast_text_view, weekForecast);
-        final ListView list = (ListView) rootView.findViewById(R.id.forecast_list_view);
+        ListView list = (ListView) rootView.findViewById(R.id.forecast_list_view);
         list.setAdapter(week);
         setHasOptionsMenu(true);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
