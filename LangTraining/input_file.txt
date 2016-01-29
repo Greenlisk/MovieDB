@@ -1,5 +1,6 @@
-First string in this file
-Second string in this file
-Third sheep in this file @-_-@
-Fourth trooper in the stream
-Fifth tab	in this string
+1 First string in this file
+2 Second string in this file
+3 Third sheep in this file @-_-@
+4 Fourth trooper in the stream
+5 Fifth tab	in this string
+6 Everything is false
