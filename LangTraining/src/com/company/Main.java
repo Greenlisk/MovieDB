@@ -8,15 +8,20 @@ import java.io.IOException;
 
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException{
         /*DataProcessor dataProcessor = new DataProcessor();
         dataProcessor.processText("input_file.txt", "output_file.txt");
         dataProcessor.processData("input_file.data");*/
         try {
-            AuthSystem authSystem = new AuthSystem("~/Projects/Java/Java-training-project/LangTraining/UsersDir");
+            AuthSystem authSystem = new AuthSystem("/home/green/Work/Java-training-project/LangTraining/UsersDir");
             authSystem.authenticate();
         } catch (IOException ioex) {
-            System.err.println("Something wrong with files)))");
+            System.err.println("Something wrong with files))): " + ioex.getMessage());
+            StackTraceElement[] stackTraceElements  = ioex.getStackTrace();
+            for (StackTraceElement element : stackTraceElements) {
+                System.err.println(element.getMethodName());
+            }
+
         }
     }
 

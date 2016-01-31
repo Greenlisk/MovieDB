@@ -27,13 +27,12 @@ public class AuthSystem {
             System.err.println("Users directory not found.");
             System.exit(1);
         }
-
     }
 
     //void startSession();
     public boolean authenticate() throws IOException {
         String login = console.readLine("Login: ");
-        Path userFilePath = Paths.get(login).resolve(usersDirPath);
+        Path userFilePath = Paths.get(usersDirPath.toString(), login);
             if (!Files.exists(userFilePath)) {
                 Files.createFile(userFilePath);
                 createUser(userFilePath);
@@ -41,12 +40,7 @@ public class AuthSystem {
         try (DataInputStream input = new DataInputStream(
                 new BufferedInputStream(
                         new FileInputStream(userFilePath.toString())
-                ));
-            DataOutputStream output = new DataOutputStream(
-                    new BufferedOutputStream(
-                            new FileOutputStream(userFilePath.toString())
-                    )
-            )) {
+                ))) {
             String filePassword = input.readUTF();
             if (filePassword == null) {
                 return false;
@@ -58,10 +52,12 @@ public class AuthSystem {
 
             MessageDigest messageDigestConsole = MessageDigest.getInstance("SHA-256");
             messageDigestConsole.update(inputPassword.getBytes());
-            if (new String(messageDigestConsole.digest()).equals(filePassword)) {
+            String encryptedPass = messageDigestConsole.digest().toString();
+            //filePassword = filePassword.replaceAll("\\p{Cntrl}", "");
+            console.printf("Console: " + encryptedPass + "\n File: " + filePassword + "\n");
+            if (encryptedPass.equals(filePassword)) {
                 return true;
             } else {
-                console.printf("Wrong password!");
                 console.printf("Wrong password!");
                 return false;
             }
@@ -73,7 +69,7 @@ public class AuthSystem {
     }
 
     boolean createUser(Path outPath) throws IOException {
-        console.printf("Creating new user.");
+        //console.printf("Creating new user.");
         boolean incorrectPassword = true;
         try(DataOutputStream out = new DataOutputStream(
                 new BufferedOutputStream(
@@ -82,10 +78,11 @@ public class AuthSystem {
         )){
         while (incorrectPassword) {
             String password = new String(console.readPassword("Please type new password: "));
-            if (password.equals(new String(console.readLine("Repeat new password: ")))) {
+            if (password.equals(new String(console.readPassword("Repeat new password: ")))) {
                 MessageDigest messageDigestConsole = MessageDigest.getInstance("SHA-256");
                 messageDigestConsole.update(password.getBytes());
-                out.writeUTF(new String(messageDigestConsole.digest()));
+                console.printf("PASS HASH: " + messageDigestConsole.digest().toString() + "\n");
+                out.writeUTF(messageDigestConsole.digest().toString());
                 incorrectPassword = false;
             }
         }
@@ -94,7 +91,10 @@ public class AuthSystem {
         } catch (NoSuchAlgorithmException nsaex) {
             System.err.println("Encryption algorithm error!");
             System.exit(1);
+        } finally {
+
         }
+
         return true;
     }
 }
