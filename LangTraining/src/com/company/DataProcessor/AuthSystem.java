@@ -52,24 +52,21 @@ public class AuthSystem {
 
             MessageDigest messageDigestConsole = MessageDigest.getInstance("SHA-256");
             messageDigestConsole.update(inputPassword.getBytes());
-            String encryptedPass = messageDigestConsole.digest().toString();
-            //filePassword = filePassword.replaceAll("\\p{Cntrl}", "");
-            console.printf("Console: " + encryptedPass + "\n File: " + filePassword + "\n");
+            String encryptedPass = new String(messageDigestConsole.digest());
             if (encryptedPass.equals(filePassword)) {
                 return true;
             } else {
-                console.printf("Wrong password!");
+                console.printf("Wrong password!\n");
                 return false;
             }
 
         } catch (NoSuchAlgorithmException nsaex) {
-
+            System.err.println();
         }
         return true;
     }
 
     boolean createUser(Path outPath) throws IOException {
-        //console.printf("Creating new user.");
         boolean incorrectPassword = true;
         try(DataOutputStream out = new DataOutputStream(
                 new BufferedOutputStream(
@@ -81,8 +78,8 @@ public class AuthSystem {
             if (password.equals(new String(console.readPassword("Repeat new password: ")))) {
                 MessageDigest messageDigestConsole = MessageDigest.getInstance("SHA-256");
                 messageDigestConsole.update(password.getBytes());
-                console.printf("PASS HASH: " + messageDigestConsole.digest().toString() + "\n");
-                out.writeUTF(messageDigestConsole.digest().toString());
+                String encryptedPass = new String(messageDigestConsole.digest());
+                out.writeUTF(encryptedPass);
                 incorrectPassword = false;
             }
         }
