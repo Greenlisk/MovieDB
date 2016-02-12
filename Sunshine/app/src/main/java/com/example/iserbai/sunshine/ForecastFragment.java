@@ -41,13 +41,14 @@ public class ForecastFragment extends Fragment {
     }
     private String LOG_TAG = "ForecastFragment";
     private ArrayAdapter<String> week;
+    volatile String[] days = {"Monday", "Tuesday", "Wednesday", "Thirsday", "Friday", "Saturday", "Sunday"};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        String[] days={"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+        new FetchWeatherTask().execute("94043");
         List<String> weekForecast = new ArrayList<String>(Arrays.asList(days));
         week = new ArrayAdapter<String>(getActivity(), R.layout.fragment_main,
                 R.id.forecast_text_view, weekForecast);
@@ -81,6 +82,10 @@ public class ForecastFragment extends Fragment {
 
         if (id == R.id.action_refresh) {
            new FetchWeatherTask().execute("94043");
+        }
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(getContext(), SettingsActivity.class);
+            startActivity(intent);
         }
         return true;
     }
