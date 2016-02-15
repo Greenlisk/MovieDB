@@ -1,9 +1,11 @@
 package com.example.iserbai.sunshine;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,11 +28,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
 
 /**
  * A placeholder fragment containing a simple view.
@@ -41,17 +43,17 @@ public class ForecastFragment extends Fragment {
     }
     private String LOG_TAG = "ForecastFragment";
     private ArrayAdapter<String> week;
-    volatile String[] days = {"Monday", "Tuesday", "Wednesday", "Thirsday", "Friday", "Saturday", "Sunday"};
+    private String postalCode;
+    private String units;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        new FetchWeatherTask().execute("94043");
-        List<String> weekForecast = new ArrayList<String>(Arrays.asList(days));
         week = new ArrayAdapter<String>(getActivity(), R.layout.fragment_main,
-                R.id.forecast_text_view, weekForecast);
+                R.id.forecast_text_view, new ArrayList<String>());
+
         ListView list = (ListView) rootView.findViewById(R.id.forecast_list_view);
         list.setAdapter(week);
         setHasOptionsMenu(true);
@@ -71,6 +73,17 @@ public class ForecastFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        postalCode = PreferenceManager.getDefaultSharedPreferences(this.getContext())
+                .getString("location", "94043");
+        units = PreferenceManager.getDefaultSharedPreferences(this.getContext())
+                .getString("units", "metric");
+        new FetchWeatherTask().execute(postalCode, units);
+
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.forecast_fragment, menu);
         //return true;
@@ -81,11 +94,17 @@ public class ForecastFragment extends Fragment {
         int id = menuItem.getItemId();
 
         if (id == R.id.action_refresh) {
-           new FetchWeatherTask().execute("94043");
+           new FetchWeatherTask().execute(postalCode, units);
         }
         if (id == R.id.action_settings) {
             Intent intent = new Intent(getContext(), SettingsActivity.class);
             startActivity(intent);
+        }
+        if (id == R.id.action_preffered_location) {
+            Uri.Builder uriBuilder = new Uri.Builder();
+            uriBuilder.append
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(uriBuilder.build())
         }
         return true;
     }
@@ -106,7 +125,7 @@ public class ForecastFragment extends Fragment {
                 uriBuilder.appendPath("daily");
                 uriBuilder.appendQueryParameter("q", postcode[0]);
                 uriBuilder.appendQueryParameter("mode", "json");
-                uriBuilder.appendQueryParameter("units", "metric");
+                uriBuilder.appendQueryParameter("units", postcode[1]);
                 uriBuilder.appendQueryParameter("APPID", "32748294cda27141429efc3490f0e6d3");
                 Uri uri = uriBuilder.build();
                 Log.v(LOG_TAG, uri.toString());
@@ -182,6 +201,14 @@ public class ForecastFragment extends Fragment {
          * Prepare the weather high/lows for presentation.
          */
         private String formatHighLows(double high, double low) {
+            SharedPreferences unitPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+            String units = unitPref.getString("units", "metric");
+            if (units.equals(getString(R.string.pref_units_key_imperial))) {
+                high = (high * 1.8) + 32;
+                low = (low * 1.8) + 32;
+            } else if (!units.equals(getString(R.string.pref_units_key_metric))) {
+                Log.d(LOG_TAG, "Unit type not found: " + units);
+            }
             // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);

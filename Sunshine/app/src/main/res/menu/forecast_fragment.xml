@@ -10,4 +10,9 @@
         android:title="@string/action_settings"
         android:orderInCategory="80"
         app:showAsAction="never"/>
+
+    <item android:id="@+id/action_preffered_location"
+        android:title="@string/action_preferred_location"
+        android:orderInCategory="70"
+        app:showAsAction="never"/>
 </menu>
