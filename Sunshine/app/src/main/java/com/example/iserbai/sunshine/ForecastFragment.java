@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -100,12 +99,7 @@ public class ForecastFragment extends Fragment {
             Intent intent = new Intent(getContext(), SettingsActivity.class);
             startActivity(intent);
         }
-        if (id == R.id.action_preffered_location) {
-            Uri.Builder uriBuilder = new Uri.Builder();
-            uriBuilder.append
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(uriBuilder.build())
-        }
+
         return true;
     }
 
