@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,13 +20,17 @@ import org.w3c.dom.Text;
  * Created by iserbai on 29.02.16.
  */
 public class MainDescriptionFragment extends Fragment {
+    private final String LOG_TAG = "DescriptionPragment";
     View rootView;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup, Bundle onSave) {
         rootView = inflater.inflate(R.layout.fragment_description, viewGroup);
         Intent intent = getActivity().getIntent();
-        if (intent.getExtras() != null) {
-            new FetchMovie().execute(getActivity().getIntent().getExtras().getLong("movie_id"));
+
+        if (intent.getAction() != Intent.ACTION_MAIN) {
+            Log.v(LOG_TAG, "Intent: " + intent.getExtras().getLong("movie_id"));
+            Log.v(LOG_TAG, "Intent: " + intent.getAction());
+            new FetchMovie().execute(intent.getExtras().getLong("movie_id"));
         }
         return rootView;
     }

@@ -1,5 +1,9 @@
 [
     {
+        "merged": "/home/iserbai/Projects/Java/Java-training-project/MovieDB/app/build/intermediates/res/merged/debug/mipmap-mdpi-v4/ic_launcher.png",
+        "source": "/home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/res/mipmap-mdpi/ic_launcher.png"
+    },
+    {
         "merged": "/home/green/Work/Java-training-project/MovieDB/app/build/intermediates/res/merged/debug/mipmap-mdpi-v4/ic_launcher.png",
         "source": "/home/green/Work/Java-training-project/MovieDB/app/src/main/res/mipmap-mdpi/ic_launcher.png"
     }

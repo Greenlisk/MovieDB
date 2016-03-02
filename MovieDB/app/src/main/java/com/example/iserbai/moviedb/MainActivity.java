@@ -12,15 +12,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if ( getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Log.v(LOG_TAG, "Orient Vertical");
-            setContentView(R.layout.activity_main_portrait);
-
-        } else {
-            Log.v(LOG_TAG, "Orient Horizont");
-            setContentView(R.layout.activity_main_landscape);
-
-        }
+        setContentView(R.layout.activity_main);
 
     }
 

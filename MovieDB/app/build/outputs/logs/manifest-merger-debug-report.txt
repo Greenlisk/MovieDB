@@ -1,65 +1,65 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:2:1-25:12
-	package
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:3:5-42
-		INJECTED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
-		INJECTED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
-	android:versionName
-		INJECTED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
-		INJECTED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
+ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:2:1-25:12
 	xmlns:android
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:2:11-69
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:2:11-69
+	package
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:3:5-42
+		INJECTED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
+		INJECTED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
+		INJECTED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
 	android:versionCode
-		INJECTED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
-		INJECTED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
+		INJECTED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
+		INJECTED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
 uses-permission#android.permission.INTERNET
-ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:5:5-66
+ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:5:5-66
 	android:name
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:5:22-64
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:5:22-64
 uses-permission#android.permission.ACCESS_WIFI_STATE
-ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:6:5-75
+ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:6:5-75
 	android:name
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:6:22-73
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:6:22-73
 application
-ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:7:5-23:19
-MERGED from [com.android.support:appcompat-v7:23.1.1] /home/green/Work/Java-training-project/MovieDB/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.1/AndroidManifest.xml:22:5-20
-MERGED from [com.android.support:support-v4:23.1.1] /home/green/Work/Java-training-project/MovieDB/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.1.1/AndroidManifest.xml:22:5-20
-	android:label
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:10:9-41
+ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:7:5-23:19
+MERGED from [com.android.support:appcompat-v7:23.1.1] /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.1/AndroidManifest.xml:22:5-20
+MERGED from [com.android.support:support-v4:23.1.1] /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.1.1/AndroidManifest.xml:22:5-20
 	android:supportsRtl
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:11:9-35
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:11:9-35
+	android:label
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:10:9-41
 	android:allowBackup
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:8:9-35
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:8:9-35
 	android:icon
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:9:9-43
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:9:9-43
 	android:theme
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:12:9-40
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:12:9-40
 activity#com.example.iserbai.moviedb.MainActivity
-ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:14:9-21:20
+ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:14:9-21:20
 	android:name
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:14:19-47
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:14:19-47
 intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
-ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:16:13-20:29
+ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:16:13-20:29
 action#android.intent.action.MAIN
-ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:17:17-69
+ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:17:17-69
 	android:name
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:17:25-66
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:17:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:19:17-77
+ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:19:17-77
 	android:name
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:19:27-74
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:19:27-74
 activity#com.example.iserbai.moviedb.DescriptionActivity
-ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:22:9-56
+ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:22:9-56
 	android:name
-		ADDED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:22:19-54
+		ADDED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml:22:19-54
 uses-sdk
-INJECTED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
-MERGED from [com.android.support:appcompat-v7:23.1.1] /home/green/Work/Java-training-project/MovieDB/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.1/AndroidManifest.xml:20:5-43
-MERGED from [com.android.support:support-v4:23.1.1] /home/green/Work/Java-training-project/MovieDB/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.1.1/AndroidManifest.xml:20:5-43
+INJECTED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+MERGED from [com.android.support:appcompat-v7:23.1.1] /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.1/AndroidManifest.xml:20:5-43
+MERGED from [com.android.support:support-v4:23.1.1] /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.1.1/AndroidManifest.xml:20:5-43
 	android:targetSdkVersion
-		INJECTED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
-		INJECTED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
+		INJECTED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
+		INJECTED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
-		INJECTED from /home/green/Work/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
+		INJECTED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml
+		INJECTED from /home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/AndroidManifest.xml

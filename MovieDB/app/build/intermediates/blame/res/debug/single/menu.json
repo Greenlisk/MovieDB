@@ -2,5 +2,9 @@
     {
         "merged": "/home/green/Work/Java-training-project/MovieDB/app/build/intermediates/res/merged/debug/menu/menu_sort.xml",
         "source": "/home/green/Work/Java-training-project/MovieDB/app/src/main/res/menu/menu_sort.xml"
+    },
+    {
+        "merged": "/home/iserbai/Projects/Java/Java-training-project/MovieDB/app/build/intermediates/res/merged/debug/menu/menu_sort.xml",
+        "source": "/home/iserbai/Projects/Java/Java-training-project/MovieDB/app/src/main/res/menu/menu_sort.xml"
     }
 ]

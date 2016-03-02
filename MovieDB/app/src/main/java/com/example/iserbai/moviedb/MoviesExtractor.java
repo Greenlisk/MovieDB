@@ -140,7 +140,8 @@ public class MoviesExtractor {
             parseJSON(buffer.toString());
 
         } catch (IOException ioex) {
-
+            Log.e(LOG_TAG, "IOException happened: " + ioex.getMessage());
+            return false;
         }
         numPages++;
         return true;
@@ -156,7 +157,7 @@ public class MoviesExtractor {
                 Log.v(LOG_TAG, movie.toString());
             }
         } catch (JSONException jsonex) {
-
+            Log.e(LOG_TAG, "Unable to parse JSON!!!");
         }
     }
 }

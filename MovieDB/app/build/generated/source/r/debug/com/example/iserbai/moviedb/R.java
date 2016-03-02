@@ -1734,10 +1734,10 @@ containing a value of this type.
         public static final int abc_search_view=0x7f040017;
         public static final int abc_select_dialog_material=0x7f040018;
         public static final int activity_description_portrait=0x7f040019;
-        public static final int activity_main_landscape=0x7f04001a;
-        public static final int activity_main_portrait=0x7f04001b;
-        public static final int fragment_description=0x7f04001c;
-        public static final int fragment_grid=0x7f04001d;
+        public static final int activity_main=0x7f04001a;
+        public static final int fragment_description=0x7f04001b;
+        public static final int fragment_grid=0x7f04001c;
+        public static final int grid_tem=0x7f04001d;
         public static final int notification_media_action=0x7f04001e;
         public static final int notification_media_cancel_action=0x7f04001f;
         public static final int notification_template_big_media=0x7f040020;

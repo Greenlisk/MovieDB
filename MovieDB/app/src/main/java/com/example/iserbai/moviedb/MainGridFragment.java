@@ -120,12 +120,16 @@ public class MainGridFragment extends Fragment implements GridView.OnItemClickLi
         public Boolean doInBackground(Integer... none) {
             if (!extractor.getPage(++pages)){
                 Log.e(LOG_TAG, "Didn't fetch!!!!");
+                return false;
             }
             return true;
         }
 
         @Override
         public void onPostExecute(Boolean res) {
+            if (!res) {
+                return;
+            }
             for(int i = 0; i < 20; ++i) {
                 adapter.add(extractor.moviesList.get((pages-1)*10 + i).posterPath);
             }
@@ -171,7 +175,7 @@ public class MainGridFragment extends Fragment implements GridView.OnItemClickLi
             ImageView imageView;
             View view;
             if (convertView == null) {
-                view = inflater.inflate(R.layout.fragment_grid, parent, false);
+                view = inflater.inflate(R.layout.grid_tem, parent, false);
             } else {
                 view = convertView;
             }
