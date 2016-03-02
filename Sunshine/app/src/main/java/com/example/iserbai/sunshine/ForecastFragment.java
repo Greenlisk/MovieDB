@@ -124,7 +124,7 @@ public class ForecastFragment extends Fragment {
                 Uri uri = uriBuilder.build();
                 Log.v(LOG_TAG, uri.toString());
                 URL url = new URL(uri.toString());
-                urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
 

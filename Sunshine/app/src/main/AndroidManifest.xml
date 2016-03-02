@@ -3,6 +3,7 @@
     package="com.example.iserbai.sunshine">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -16,11 +17,13 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <category />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
         <activity
+
             android:name=".DetailedActivity"
             android:label="@string/title_activity_detailed"
             android:parentActivityName=".MainActivity"
