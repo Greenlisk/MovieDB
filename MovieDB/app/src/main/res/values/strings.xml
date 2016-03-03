@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">MovieDB</string>
+    <string name="poster">Poster</string>
+    <string name="title_sample">Movie title:</string>
+    <string name="overview_sample">Movie overview:</string>
+    <string name="poster_description">Movie poster</string>
+    <string name="title_sort_popular">Sort by "popular"</string>>
+    <string name="title_sort_top_rated">Sort by "top rated"</string>
+</resources>
