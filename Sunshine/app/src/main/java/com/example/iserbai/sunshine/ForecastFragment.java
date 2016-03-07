@@ -1,7 +1,13 @@
 package com.example.iserbai.sunshine;
 
+import android.app.LoaderManager;
+import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,6 +24,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.text.format.Time;
+
+import com.example.iserbai.sunshine.data.WeatherDbHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,11 +44,12 @@ import java.util.ArrayList;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class ForecastFragment extends Fragment {
+public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public ForecastFragment() {
     }
     private String LOG_TAG = "ForecastFragment";
+    private final int LOADER_ID = 0;
     private ArrayAdapter<String> week;
     private String postalCode;
     private String units;
@@ -78,7 +87,8 @@ public class ForecastFragment extends Fragment {
                 .getString("location", "94043");
         units = PreferenceManager.getDefaultSharedPreferences(this.getContext())
                 .getString("units", "metric");
-        new FetchWeatherTask().execute(postalCode, units);
+        //new FetchWeatherTask().execute(postalCode, units);
+
 
     }
 
@@ -103,6 +113,41 @@ public class ForecastFragment extends Fragment {
         return true;
     }
 
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle onSavedInstanceState) {
+        //WeatherLoader
+        return null;
+    }
+
+    private class WeatherLoader extends CursorLoader {
+        private String postalCode;
+        private String units;
+        private Context context;
+        WeatherLoader(Context context) {
+            super(context);
+            this.context = context;
+
+            postalCode = PreferenceManager.getDefaultSharedPreferences(this.getContext())
+                    .getString("location", "94043");
+            units = PreferenceManager.getDefaultSharedPreferences(this.getContext())
+                    .getString("units", "metric");
+        }
+
+        @Override
+        public Cursor loadInBackground() {
+            WeatherDbHelper weatherDbHelper = new WeatherDbHelper(context);
+            ConnectivityManager connectivityManager =
+                    (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if(connectivityManager.getActiveNetworkInfo() != null &&
+                    connectivityManager.getActiveNetworkInfo().isConnected())
+            {
+
+            }
+
+            return null;
+        }
+    }
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         @Override
         public String[] doInBackground(String... postcode) {
