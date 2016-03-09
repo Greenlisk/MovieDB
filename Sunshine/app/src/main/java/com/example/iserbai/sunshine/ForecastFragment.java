@@ -1,18 +1,20 @@
 package com.example.iserbai.sunshine;
 
-import android.app.LoaderManager;
-import android.content.Context;
-import android.content.CursorLoader;
+import android.content.ContentValues;
+import android.support.v4.widget.CursorAdapter;
+import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.app.LoaderManager;
+import android.content.Context;;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,10 +23,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.text.format.Time;
+import android.widget.TextView;
 
+import com.example.iserbai.sunshine.data.WeatherContract;
 import com.example.iserbai.sunshine.data.WeatherDbHelper;
 
 import org.json.JSONArray;
@@ -38,7 +40,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 
 
 /**
@@ -48,20 +49,19 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     public ForecastFragment() {
     }
-    private String LOG_TAG = "ForecastFragment";
+
+    private final static String LOG_TAG = "ForecastFragment";
     private final int LOADER_ID = 0;
-    private ArrayAdapter<String> week;
-    private String postalCode;
-    private String units;
+    private ForecastListAdapter week;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        week = new ArrayAdapter<String>(getActivity(), R.layout.fragment_main,
-                R.id.forecast_text_view, new ArrayList<String>());
-
+        week = new ForecastListAdapter(getActivity(), null);
+        getLoaderManager().initLoader(LOADER_ID, savedInstanceState, this);
         ListView list = (ListView) rootView.findViewById(R.id.forecast_list_view);
         list.setAdapter(week);
         setHasOptionsMenu(true);
@@ -69,25 +69,26 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String EXTRA_MESSAGE = "forecast_data";
-                CharSequence intentText = week.getItem(position);
+                TextView textView = (TextView) view;
+                CharSequence intentText = textView.getText();
                 Intent intent = new Intent(getContext(), DetailedActivity.class);
                 intent.putExtra(EXTRA_MESSAGE, intentText);
                 startActivity(intent);
 
             }
         });
-
+        getLoaderManager().initLoader(LOADER_ID, savedInstanceState, this);
         return rootView;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        postalCode = PreferenceManager.getDefaultSharedPreferences(this.getContext())
+        String postalCode = PreferenceManager.getDefaultSharedPreferences(this.getContext())
                 .getString("location", "94043");
-        units = PreferenceManager.getDefaultSharedPreferences(this.getContext())
+        String units = PreferenceManager.getDefaultSharedPreferences(this.getContext())
                 .getString("units", "metric");
-        //new FetchWeatherTask().execute(postalCode, units);
+        getLoaderManager().restartLoader(LOADER_ID, null, this);
 
 
     }
@@ -103,7 +104,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         int id = menuItem.getItemId();
 
         if (id == R.id.action_refresh) {
-           new FetchWeatherTask().execute(postalCode, units);
+            getLoaderManager().restartLoader(LOADER_ID, null, this);
         }
         if (id == R.id.action_settings) {
             Intent intent = new Intent(getContext(), SettingsActivity.class);
@@ -116,222 +117,66 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle onSavedInstanceState) {
-        //WeatherLoader
-        return null;
+        WeatherLoader weatherLoader = new WeatherLoader(getActivity());
+        return weatherLoader;
     }
 
-    private class WeatherLoader extends CursorLoader {
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        week.changeCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    private class ForecastListAdapter extends CursorAdapter {
+        ForecastListAdapter(Context context, Cursor c) {
+            super(context, c, 0);
+        }
+
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            return LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            TextView forecast = (TextView) view.findViewById(R.id.forecast_text_view);
+            StringBuilder builder = new StringBuilder();
+            builder.append(WeatherLoader.getReadableDateString(cursor.getLong(0)) + "-");
+            builder.append(cursor.getString(1) + "-");
+            builder.append(cursor.getString(2) + "-");
+            builder.append(cursor.getString(3) + "-");
+            forecast.setText(builder.toString());
+        }
+    }
+
+    private static class WeatherLoader extends CursorLoader {
         private String postalCode;
         private String units;
         private Context context;
+        WeatherDbHelper weatherDbHelper;
+
         WeatherLoader(Context context) {
             super(context);
             this.context = context;
-
-            postalCode = PreferenceManager.getDefaultSharedPreferences(this.getContext())
-                    .getString("location", "94043");
-            units = PreferenceManager.getDefaultSharedPreferences(this.getContext())
-                    .getString("units", "metric");
         }
 
         @Override
         public Cursor loadInBackground() {
-            WeatherDbHelper weatherDbHelper = new WeatherDbHelper(context);
-            ConnectivityManager connectivityManager =
-                    (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            if(connectivityManager.getActiveNetworkInfo() != null &&
-                    connectivityManager.getActiveNetworkInfo().isConnected())
-            {
-
+            if (weatherDbHelper == null) {
+                Log.v(LOG_TAG, "Creating DB!!!!");
+                weatherDbHelper = new WeatherDbHelper(context);
             }
+            postalCode = PreferenceManager.getDefaultSharedPreferences(this.getContext())
+                    .getString("location", "94043");
+            units = PreferenceManager.getDefaultSharedPreferences(this.getContext())
+                    .getString("units", "metric");
+            return getForecastCursor(postalCode, units);
 
-            return null;
-        }
-    }
-    private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
-        @Override
-        public String[] doInBackground(String... postcode) {
-            HttpURLConnection urlConnection = null;
-            BufferedReader bufReader = null;
-
-            try {
-                Uri.Builder uriBuilder = new Uri.Builder();
-                uriBuilder.scheme("http");
-                uriBuilder.authority("api.openweathermap.org");
-                uriBuilder.appendPath("data");
-                uriBuilder.appendPath("2.5");
-                uriBuilder.appendPath("forecast");
-                uriBuilder.appendPath("daily");
-                uriBuilder.appendQueryParameter("q", postcode[0]);
-                uriBuilder.appendQueryParameter("mode", "json");
-                uriBuilder.appendQueryParameter("units", postcode[1]);
-                uriBuilder.appendQueryParameter("APPID", "32748294cda27141429efc3490f0e6d3");
-                Uri uri = uriBuilder.build();
-                Log.v(LOG_TAG, uri.toString());
-                URL url = new URL(uri.toString());
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-
-
-
-                if (inputStream == null) {
-                    return null;
-                }
-
-                bufReader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-
-                while ((line = bufReader.readLine()) != null) {
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    return null;
-                }
-
-                Log.v(LOG_TAG, "Output: " + buffer.toString());
-                try {
-                    String[] daysForecast = getWeatherDataFromJson(buffer.toString(), 7);
-                    return daysForecast;
-                } catch (JSONException je) {
-
-                }
-
-            } catch (IOException e) {
-                Log.e("Fragment some exception", "Error mzfk",e);
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (bufReader != null) {
-                    try {
-                        bufReader.close();
-                    } catch (final IOException e) {
-                        Log.e("PlaceholderFragment", "Error closing stream", e);
-                    }
-                }
-            }
-            return null;
         }
 
-        @Override
-        protected void onPostExecute(String[] result) {
-            if (result != null) {
-                week.clear();
-                for (String day : result) {
-                    week.add(day);
-                }
-            }
-        }
-
-        private String getReadableDateString(long time){
-            // Because the API returns a unix timestamp (measured in seconds),
-            // it must be converted to milliseconds in order to be converted to valid date.
-            SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
-            return shortenedDateFormat.format(time);
-        }
-
-        /**
-         * Prepare the weather high/lows for presentation.
-         */
-        private String formatHighLows(double high, double low) {
-            SharedPreferences unitPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-            String units = unitPref.getString("units", "metric");
-            if (units.equals(getString(R.string.pref_units_key_imperial))) {
-                high = (high * 1.8) + 32;
-                low = (low * 1.8) + 32;
-            } else if (!units.equals(getString(R.string.pref_units_key_metric))) {
-                Log.d(LOG_TAG, "Unit type not found: " + units);
-            }
-            // For presentation, assume the user doesn't care about tenths of a degree.
-            long roundedHigh = Math.round(high);
-            long roundedLow = Math.round(low);
-
-            String highLowStr = roundedHigh + "/" + roundedLow;
-            return highLowStr;
-        }
-
-        /**
-         * Take the String representing the complete forecast in JSON Format and
-         * pull out the data we need to construct the Strings needed for the wireframes.
-         *
-         * Fortunately parsing is easy:  constructor takes the JSON string and converts it
-         * into an Object hierarchy for us.
-         */
-        private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays)
-                throws JSONException {
-
-            // These are the names of the JSON objects that need to be extracted.
-            final String OWM_LIST = "list";
-            final String OWM_WEATHER = "weather";
-            final String OWM_TEMPERATURE = "temp";
-            final String OWM_MAX = "max";
-            final String OWM_MIN = "min";
-            final String OWM_DESCRIPTION = "main";
-
-            JSONObject forecastJson = new JSONObject(forecastJsonStr);
-            JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
-
-            // OWM returns daily forecasts based upon the local time of the city that is being
-            // asked for, which means that we need to know the GMT offset to translate this data
-            // properly.
-
-            // Since this data is also sent in-order and the first day is always the
-            // current day, we're going to take advantage of that to get a nice
-            // normalized UTC date for all of our weather.
-
-            Time dayTime = new Time();
-            dayTime.setToNow();
-
-            // we start at the day returned by local time. Otherwise this is a mess.
-            int julianStartDay = Time.getJulianDay(System.currentTimeMillis(), dayTime.gmtoff);
-
-            // now we work exclusively in UTC
-            dayTime = new Time();
-
-            String[] resultStrs = new String[numDays];
-            for(int i = 0; i < weatherArray.length(); i++) {
-                // For now, using the format "Day, description, hi/low"
-                String day;
-                String description;
-                String highAndLow;
-
-                // Get the JSON object representing the day
-                JSONObject dayForecast = weatherArray.getJSONObject(i);
-
-                // The date/time is returned as a long.  We need to convert that
-                // into something human-readable, since most people won't read "1400356800" as
-                // "this saturday".
-                long dateTime;
-                // Cheating to convert this to UTC time, which is what we want anyhow
-                dateTime = dayTime.setJulianDay(julianStartDay+i);
-                day = getReadableDateString(dateTime);
-
-                // description is in a child array called "weather", which is 1 element long.
-                JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
-                description = weatherObject.getString(OWM_DESCRIPTION);
-
-                // Temperatures are in a child object called "temp".  Try not to name variables
-                // "temp" when working with temperature.  It confuses everybody.
-                JSONObject temperatureObject = dayForecast.getJSONObject(OWM_TEMPERATURE);
-                double high = temperatureObject.getDouble(OWM_MAX);
-                double low = temperatureObject.getDouble(OWM_MIN);
-
-                highAndLow = formatHighLows(high, low);
-                resultStrs[i] = day + " - " + description + " - " + highAndLow;
-            }
-
-            for (String s : resultStrs) {
-                Log.v(LOG_TAG, "Forecast entry: " + s);
-            }
-            return resultStrs;
-
-        }
     }
 }
-

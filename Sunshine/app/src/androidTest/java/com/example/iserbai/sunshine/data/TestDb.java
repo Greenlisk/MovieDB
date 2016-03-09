@@ -15,10 +15,17 @@
  */
 package com.example.iserbai.sunshine.data;
 
+import android.content.AsyncTaskLoader;
+import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Loader;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.support.v4.content.CursorLoader;
 import android.test.AndroidTestCase;
+import android.widget.SimpleCursorAdapter;
 
 import java.util.HashSet;
 
@@ -146,7 +153,6 @@ public class TestDb extends AndroidTestCase {
         // Finally, close the cursor and database
 
     }
-
     /*
         Students:  Here is where you will build code to test that we can insert and query the
         database.  We've done a lot of work for you.  You'll want to look in TestUtilities
