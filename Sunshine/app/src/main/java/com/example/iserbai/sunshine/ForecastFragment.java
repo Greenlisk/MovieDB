@@ -23,11 +23,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.iserbai.sunshine.data.WeatherContract;
 import com.example.iserbai.sunshine.data.WeatherDbHelper;
+import com.example.iserbai.sunshine.data.WeatherFetcher;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,22 +48,21 @@ import java.text.SimpleDateFormat;
  * A placeholder fragment containing a simple view.
  */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
-
-    public ForecastFragment() {
-    }
-
     private final static String LOG_TAG = "ForecastFragment";
     private final int LOADER_ID = 0;
     private ForecastListAdapter week;
+    WeatherFetcher weatherFetcher;
 
+    public ForecastFragment() {
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
-        week = new ForecastListAdapter(getActivity(), null);
-        getLoaderManager().initLoader(LOADER_ID, savedInstanceState, this);
+        weatherFetcher = new WeatherFetcher(getContext());
+            week = new ForecastListAdapter(getContext(), null);
         ListView list = (ListView) rootView.findViewById(R.id.forecast_list_view);
         list.setAdapter(week);
         setHasOptionsMenu(true);
@@ -69,10 +70,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String EXTRA_MESSAGE = "forecast_data";
-                TextView textView = (TextView) view;
-                CharSequence intentText = textView.getText();
                 Intent intent = new Intent(getContext(), DetailedActivity.class);
-                intent.putExtra(EXTRA_MESSAGE, intentText);
+                intent.putExtra(EXTRA_MESSAGE, position);
                 startActivity(intent);
 
             }
@@ -84,11 +83,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onStart() {
         super.onStart();
-        String postalCode = PreferenceManager.getDefaultSharedPreferences(this.getContext())
-                .getString("location", "94043");
-        String units = PreferenceManager.getDefaultSharedPreferences(this.getContext())
-                .getString("units", "metric");
-        getLoaderManager().restartLoader(LOADER_ID, null, this);
+        //getLoaderManager().restartLoader(LOADER_ID, null, this);
 
 
     }
@@ -96,7 +91,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.forecast_fragment, menu);
-        //return true;
     }
 
     @Override
@@ -117,8 +111,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle onSavedInstanceState) {
-        WeatherLoader weatherLoader = new WeatherLoader(getActivity());
-        return weatherLoader;
+        return new WeatherLoader(getContext(), weatherFetcher);
     }
 
     @Override
@@ -129,52 +122,92 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+
     }
 
     private class ForecastListAdapter extends CursorAdapter {
+        private final int VIEW_TYPE_TODAY = 0;
+        private final int VIEW_TYPE_FUTURE = 1;
         ForecastListAdapter(Context context, Cursor c) {
             super(context, c, 0);
         }
 
+        private class ViewHolder {
+            public final ImageView weatherIcon;
+            public final TextView date;
+            public final TextView weather;
+            public final TextView tempMax;
+            public final TextView tempMin;
+
+            public ViewHolder(View view) {
+                weatherIcon = (ImageView)view.findViewById(R.id.list_weather_image);
+                date = (TextView) view.findViewById(R.id.list_date);
+                weather = (TextView) view.findViewById(R.id.list_weather);
+                tempMax = (TextView) view.findViewById(R.id.list_temperature_max);
+                tempMin = (TextView) view.findViewById(R.id.list_temperature_min);
+            }
+        }
+
+        @Override
+        public int getViewTypeCount()
+        {
+            return 2;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return position == 0 ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE;
+        }
+
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            return LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
+            int layoutId;
+            switch(getItemViewType(cursor.getPosition())) {
+                case VIEW_TYPE_TODAY: layoutId = R.layout.list_item_today; break;
+                default: layoutId = R.layout.list_item;
+            }
+
+            View rootView = LayoutInflater.from(context).inflate(layoutId, parent, false);
+            ViewHolder viewHolder = new ViewHolder(rootView);
+            rootView.setTag(viewHolder);
+            return rootView;
         }
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            TextView forecast = (TextView) view.findViewById(R.id.forecast_text_view);
-            StringBuilder builder = new StringBuilder();
-            builder.append(WeatherLoader.getReadableDateString(cursor.getLong(0)) + "-");
-            builder.append(cursor.getString(1) + "-");
-            builder.append(cursor.getString(2) + "-");
-            builder.append(cursor.getString(3) + "-");
-            forecast.setText(builder.toString());
+            ViewHolder viewHolder = (ViewHolder) view.getTag();
+
+
+
+
+            for (int i = 0; i < cursor.getColumnCount(); ++i) {
+                Log.v(LOG_TAG, "Cursor: " + cursor.getLong(1) + " " + cursor.getString(2) + " " +
+                        cursor.getString(3) + " " + cursor.getString(4));
+            }
+
+            viewHolder.weatherIcon.setImageResource(R.drawable.weather);
+            viewHolder.date.setText(new SimpleDateFormat("EEE MMM dd").format(cursor.getLong(1) * 1000 + 1));
+            viewHolder.weather.setText(cursor.getString(2));
+            viewHolder.tempMax.setText(cursor.getString(4));
+            viewHolder.tempMin.setText(cursor.getString(3));
+
         }
     }
 
     private static class WeatherLoader extends CursorLoader {
-        private String postalCode;
-        private String units;
-        private Context context;
-        WeatherDbHelper weatherDbHelper;
 
-        WeatherLoader(Context context) {
+        WeatherFetcher weatherFetcher;
+
+        WeatherLoader(Context context, WeatherFetcher weatherFetcher) {
             super(context);
-            this.context = context;
+            this.weatherFetcher = weatherFetcher;
         }
 
         @Override
         public Cursor loadInBackground() {
-            if (weatherDbHelper == null) {
-                Log.v(LOG_TAG, "Creating DB!!!!");
-                weatherDbHelper = new WeatherDbHelper(context);
-            }
-            postalCode = PreferenceManager.getDefaultSharedPreferences(this.getContext())
-                    .getString("location", "94043");
-            units = PreferenceManager.getDefaultSharedPreferences(this.getContext())
-                    .getString("units", "metric");
-            return getForecastCursor(postalCode, units);
+            Cursor result = weatherFetcher.getWeekForecastCursor();
+            Log.v(LOG_TAG, "Cursor size: " + result.getCount());
+            return result;
 
         }
 

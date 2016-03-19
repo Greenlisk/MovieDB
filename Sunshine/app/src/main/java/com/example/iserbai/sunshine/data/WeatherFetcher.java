@@ -22,27 +22,77 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by iserbai on 07.03.16.
  */
 public class WeatherFetcher {
     private final String LOG_TAG = "WeatherFetcher";
-    WeatherFetcher() {
+    private Context context;
+    WeatherDbHelper weatherDbHelper;
 
+    public WeatherFetcher(Context context) {
+        this.context = context;
+        weatherDbHelper = new WeatherDbHelper(context);
     }
 
-    public Cursor getForecastCursor(String... postcode) {
-        HttpURLConnection urlConnection = null;
-        BufferedReader bufReader = null;
+    public Cursor getForecastCursor() {
+        Log.v(LOG_TAG, "Getting forecast cursor");
+        String query = "select * from weather inner join location on weather.location_id == location._id";
+        return weatherDbHelper.getReadableDatabase().rawQuery(query, null);
+    }
+
+    public Cursor getWeekForecastCursor() {
+        Log.v(LOG_TAG, "Getting Week forecast cursor");
         ConnectivityManager connectivityManager =
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if(!(connectivityManager.getActiveNetworkInfo() != null &&
-                connectivityManager.getActiveNetworkInfo().isConnected()))
-        {
-            return getLastWeatherData();
+        if((connectivityManager.getActiveNetworkInfo() != null &&
+                connectivityManager.getActiveNetworkInfo().isConnected())) {
+            getDataFromServer();
         }
+        Cursor cityCursor = weatherDbHelper.getReadableDatabase().query(WeatherContract.LocationEntry.TABLE_NAME,
+                new String[]{WeatherContract.LocationEntry._ID},
+                WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?",
+                new String[]{PreferenceManager.getDefaultSharedPreferences(context)
+                        .getString("location", "703448")},
+                null,
+                null,
+                null,
+                "1"
+        );
+        cityCursor.moveToNext();
+        String cityId = cityCursor.getString(cityCursor.getColumnIndex("_id"));
+        cityCursor.close();
+        Log.v(LOG_TAG, "Time: " + new Date().getTime() / 1000);
+        if (cityCursor.moveToFirst()) {
+            //return weatherDbHelper.getReadableDatabase().rawQuery("select _id, date, short_desc, min, max from weather where location_id = 1 and date > 1457863200" ,null);
+            return weatherDbHelper.getReadableDatabase().query(
+                    WeatherContract.WeatherEntry.TABLE_NAME,
+                    new String[]{WeatherContract.WeatherEntry._ID,
+                            WeatherContract.WeatherEntry.COLUMN_DATE,
+                            WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
+                            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
+                            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP},
+                    WeatherContract.WeatherEntry.COLUMN_LOC_KEY + " = ? AND " +
+                            WeatherContract.WeatherEntry.COLUMN_DATE + " >= ? ",
+                    new String[]{cityId, Long.toString(new Date().getTime() / 1000)},
+                    null,
+                    null,
+                    null,
+                    null
+            );
+        }
+
+
+
+        return null;
+    }
+
+    private String getDataFromServer() {
+        HttpURLConnection urlConnection = null;
+        BufferedReader bufReader = null;
         try {
             Uri.Builder uriBuilder = new Uri.Builder();
             uriBuilder.scheme("http");
@@ -51,9 +101,11 @@ public class WeatherFetcher {
             uriBuilder.appendPath("2.5");
             uriBuilder.appendPath("forecast");
             uriBuilder.appendPath("daily");
-            uriBuilder.appendQueryParameter("id", postcode[0]);
+            uriBuilder.appendQueryParameter("id", PreferenceManager.getDefaultSharedPreferences(context)
+                    .getString("location", "703448"));
             uriBuilder.appendQueryParameter("mode", "json");
-            uriBuilder.appendQueryParameter("units", postcode[1]);
+            uriBuilder.appendQueryParameter("units", PreferenceManager.getDefaultSharedPreferences(context)
+                    .getString("units", "metric"));
             uriBuilder.appendQueryParameter("APPID", "32748294cda27141429efc3490f0e6d3");
             Uri uri = uriBuilder.build();
             Log.v(LOG_TAG, uri.toString());
@@ -62,6 +114,9 @@ public class WeatherFetcher {
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
 
+            if (urlConnection.getResponseCode()/100 == 4) {
+                Log.e(LOG_TAG, "Response: " + urlConnection.getResponseCode());
+            }
             InputStream inputStream = urlConnection.getInputStream();
             StringBuffer buffer = new StringBuffer();
 
@@ -84,14 +139,13 @@ public class WeatherFetcher {
 
             Log.v(LOG_TAG, "Output: " + buffer.toString());
             try {
-
-                return getWeatherDataFromJson(buffer.toString(), 7);
+                saveWeatherDataFromJson(buffer.toString(), 7);
             } catch (JSONException je) {
 
             }
 
         } catch (IOException e) {
-            Log.e("Fragment some exception", "Error mzfk", e);
+            Log.e("Fragment some exception", e.getMessage(), e);
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -108,18 +162,11 @@ public class WeatherFetcher {
     }
 
 
-    public static String getReadableDateString(long time){
-        // Because the API returns a unix timestamp (measured in seconds),
-        // it must be converted to milliseconds in order to be converted to valid date.
-        SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
-        return shortenedDateFormat.format(time);
-    }
-
     /**
      * Prepare the weather high/lows for presentation.
      */
     private String formatHighLows(double high, double low) {
-        SharedPreferences unitPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences unitPref = PreferenceManager.getDefaultSharedPreferences(context);
         String units = unitPref.getString("units", "metric");
         if (units.equals(context.getResources().getString(R.string.pref_units_key_imperial))) {
             high = (high * 1.8) + 32;
@@ -142,7 +189,7 @@ public class WeatherFetcher {
      * Fortunately parsing is easy:  constructor takes the JSON string and converts it
      * into an Object hierarchy for us.
      */
-    private Cursor getWeatherDataFromJson(String forecastJsonStr, int numDays)
+    private void saveWeatherDataFromJson(String forecastJsonStr, int numDays)
             throws JSONException {
 
         // These are the names of the JSON objects that need to be extracted.
@@ -171,7 +218,8 @@ public class WeatherFetcher {
         Cursor cursor = sqLiteDatabase.query(WeatherContract.LocationEntry.TABLE_NAME,
                 new String[]{WeatherContract.LocationEntry._ID},
                 WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?",
-                new String[]{postalCode},
+                new String[]{PreferenceManager.getDefaultSharedPreferences(context)
+                        .getString("location", "703448")},
                 null,
                 null,
                 null,
@@ -185,7 +233,9 @@ public class WeatherFetcher {
         } else {
             Log.v(LOG_TAG, "City doesn't exist");
             JSONObject city = jsonObject.getJSONObject(OWM_CITY);
-            cvCity.put(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING, postalCode);
+            cvCity.put(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING,
+                    PreferenceManager.getDefaultSharedPreferences(context)
+                    .getString("location", "703448"));
             cvCity.put(WeatherContract.LocationEntry.COLUMN_CITY_NAME, city.getString(OWM_CITY_NAME));
             cvCity.put(WeatherContract.LocationEntry.COLUMN_COUNTRY_NAME, city.getString(OWM_COUNTRY));
             JSONObject loc = city.getJSONObject(OWM_COORD);
@@ -193,6 +243,7 @@ public class WeatherFetcher {
             cvCity.put(WeatherContract.LocationEntry.COLUMN_COORD_LONG, loc.getString(OWM_LON));
             cityExists  = Long.toString(sqLiteDatabase.insert(WeatherContract.LocationEntry.TABLE_NAME, null, cvCity));
         }
+        cursor.close();
 
 
 
@@ -217,45 +268,38 @@ public class WeatherFetcher {
             cvWeather.put(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC, weather.getString(OWM_DESCRIPTION));
             cvWeather.put(WeatherContract.WeatherEntry.COLUMN_LOC_KEY, cityExists);
             sqLiteDatabase.insert(WeatherContract.WeatherEntry.TABLE_NAME, null, cvWeather);
+            Log.v(LOG_TAG, "Data inseted!");
         }
 
-        Cursor checkCursor = sqLiteDatabase.rawQuery("select * from weather", null);
-        if (checkCursor.moveToFirst()) {
-            for (int j = 0; j < checkCursor.getCount(); ++j) {
-                StringBuilder builder = new StringBuilder();
-                for (int k = 0; k < checkCursor.getColumnCount(); ++k) {
-                    builder.append(checkCursor.getString(k) + " ");
+        Cursor debug = weatherDbHelper.getReadableDatabase().rawQuery("select * from weather", null);
+        StringBuilder cell = new StringBuilder();
+        if(debug.moveToFirst()) {
+            for (int i = 0; i < debug.getCount(); ++i) {
+                for (int j = 0; j < debug.getColumnCount(); ++j) {
+                    cell.append(debug.getString(j) + " ");
                 }
-                Log.v(LOG_TAG, builder.toString());
-                checkCursor.moveToNext();
+                Log.v(LOG_TAG, "cell_weather: " + cell.toString());
+                cell = new StringBuilder();
+                debug.moveToNext();
             }
-        } else {
-            Log.v(LOG_TAG, "No CUrsor");
         }
-        return checkCursor;
+        debug.close();
 
+        Cursor debug1 = weatherDbHelper.getReadableDatabase().rawQuery("select * from location", null);
+        StringBuilder cell1 = new StringBuilder();
+        if(debug1.moveToFirst()) {
+            for (int i = 0; i < debug1.getCount(); ++i) {
+                for (int j = 0; j < debug1.getColumnCount(); ++j) {
+                    cell1.append(debug1.getString(j) + " ");
+                }
+                Log.v(LOG_TAG, "cell_city: " + cell1.toString());
+                cell1 = new StringBuilder();
+                debug1.moveToNext();
+            }
+        }
+        debug1.close();
 
     }
 
-    private Cursor getLastWeatherData() {
-        SQLiteDatabase sqLiteDatabase = weatherDbHelper.getWritableDatabase();
-        Cursor checkCursor = sqLiteDatabase.rawQuery("select * from weather", null);
-        if (checkCursor.moveToFirst()) {
-            for (int j = 0; j < checkCursor.getCount(); ++j) {
-                StringBuilder builder = new StringBuilder();
-                for (int k = 0; k < checkCursor.getColumnCount(); ++k) {
-                    builder.append(checkCursor.getString(k) + " ");
-                }
-                Log.v(LOG_TAG, builder.toString());
-                checkCursor.moveToNext();
-            }
-        } else {
-            Log.v(LOG_TAG, "No CUrsor");
-        }
-        return checkCursor;
-    }
-}
 }
 
-
-        }
